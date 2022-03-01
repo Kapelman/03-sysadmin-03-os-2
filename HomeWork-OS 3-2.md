@@ -99,14 +99,12 @@ Feb 08 21:38:18 vagrant node_exporter[2938]: ts=2022-02-08T21:38:18.934Z caller=
 
 
 ```
-vagrant@vagrant:/etc/default$ systemctl cat node-exporter
-# /etc/systemd/system/node-exporter.service
 [Unit]
 Description=Node Exporter
 
 [Service]
-EnvironmentFile=-/etc/default/node_exporter
-ExecStart=/home/vagrant/node_exporter-1.3.1.linux-amd64/node_exporter
+EnvironmentFile=/etc/default/node_exporter
+ExecStart=/home/vagrant/node_exporter-1.3.1.linux-amd64/node_exporter $ADD_OPT
 
 [Install]
 WantedBy=multi-user.target
@@ -124,6 +122,39 @@ drwxr-xr-x 109 root root 4096 Feb  8 19:31 ..
 -rw-r--r--   1 root root  152 Aug 19  2019 networkd-dispatcher
 -rw-r--r--   1 root root    0 Feb  8 21:48 node_exporter
 -rw-r--r--   1 root root 1756 Apr 14  2020 nss
+
+```
+Добавим опцию ADD_OPT=--help  вывод помощи, т.е. служба должна отработать и остановиться.
+
+```
+vagrant@vagrant:/etc/default$ cat node_exporter
+ADD_OPT=--help
+```
+1.7. Запустим службу с новыми параметрами, служба действительно отработала флаг --help и остановилась
+```
+vagrant@vagrant:/etc/default$ sudo systemctl stop node-exporter
+vagrant@vagrant:/etc/default$ sudo systemctl daemon-reload
+vagrant@vagrant:/etc/default$ sudo systemctl enable node-exporter.service
+Removed /etc/systemd/system/multi-user.target.wants/node-exporter.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/node-exporter.service → /etc/systemd/system/node-exporter.service.
+vagrant@vagrant:/etc/default$ sudo systemctl start node-exporter.service
+vagrant@vagrant:/etc/default$ systemctl status node-exporter.service
+● node-exporter.service - Node Exporter
+     Loaded: loaded (/etc/systemd/system/node-exporter.service; enabled; vendor preset: enabled)
+     Active: inactive (dead) since Tue 2022-03-01 22:39:42 UTC; 6s ago
+    Process: 42882 ExecStart=/home/vagrant/node_exporter-1.3.1.linux-amd64/node_exporter $ADD_OPT (code=exited, status=0/SUCCESS)
+   Main PID: 42882 (code=exited, status=0/SUCCESS)
+
+Mar 01 22:39:42 vagrant node_exporter[42882]:                                  0 to disable.
+Mar 01 22:39:42 vagrant node_exporter[42882]:       --collector.disable-defaults
+Mar 01 22:39:42 vagrant node_exporter[42882]:                                  Set all collectors to disabled by default.
+Mar 01 22:39:42 vagrant node_exporter[42882]:       --web.config=""            [EXPERIMENTAL] Path to config yaml file that
+Mar 01 22:39:42 vagrant node_exporter[42882]:                                  can enable TLS or authentication.
+Mar 01 22:39:42 vagrant node_exporter[42882]:       --log.level=info           Only log messages with the given severity or
+Mar 01 22:39:42 vagrant node_exporter[42882]:                                  above. One of: [debug, info, warn, error]
+Mar 01 22:39:42 vagrant node_exporter[42882]:       --log.format=logfmt        Output format of log messages. One of: [logfmt,
+Mar 01 22:39:42 vagrant node_exporter[42882]:                                  json]
+Mar 01 22:39:42 vagrant node_exporter[42882]:       --version                  Show application version.
 ```
 
 1.7. Проверим, что служба корректно останавливается, запускается при старте машины.
